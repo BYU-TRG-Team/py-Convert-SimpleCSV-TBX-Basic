@@ -2,7 +2,7 @@
 
 if __name__ == "__main__":
     import sys
-    from .core import Converter
+    from .SimpleGlossaryConverter import SimpleGlossaryConverter
 
-    c = Converter(sys.argv[2])
+    c = SimpleGlossaryConverter(sys.argv[2])
     c.convert(sys.argv[1], *sys.argv[3:])
