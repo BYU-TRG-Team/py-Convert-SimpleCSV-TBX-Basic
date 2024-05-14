@@ -1,3 +1,5 @@
-pyfunctional>=1.5.0
 langcodes>=3.3.0
 language_data>=1.2.0
+lxml>=5.2.1
+pyfunctional>=1.5.0
+PyQt5>=5.15.10
