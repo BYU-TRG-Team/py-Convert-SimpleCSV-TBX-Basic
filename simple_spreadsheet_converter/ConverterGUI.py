@@ -1,8 +1,7 @@
+import sys
 from os import path
 from PyQt5 import QtCore, QtWidgets, QtGui
-import sys
 import langcodes
-
 
 class ConverterGUI(QtWidgets.QWidget):
     """Provides a Qt GUI for the simple glossary converter."""
@@ -67,10 +66,12 @@ class ConverterGUI(QtWidgets.QWidget):
         self.main_layout.addWidget(self.convert_btn)
 
         self._validate_form()
+
         sys.stdout = self.LogStream(text_written=self._write_to_log_box)
 
-    def __del__(self):
+    def closeEvent(self, event):
         sys.stdout = sys.__stdout__
+        super().closeEvent(event)
 
     def _write_to_log_box(self, text):
         log_box_cursor = self.log_box.textCursor()
