@@ -23,11 +23,15 @@ class ConverterGUI(QtWidgets.QWidget):
         self.setWindowTitle("CSV to TBX-Basic Converter")
         self.resize(400, 500)
 
+        script_dir = path.dirname(path.realpath(__file__))
+        gui_icon = QtGui.QIcon(path.join(script_dir, 'assets/icons/256x256.png'))
+        self.setWindowIcon(gui_icon)
+
         self.src_lang_label = QtWidgets.QLabel("Source lang code: ")
         self.src_lang_combo_box = QtWidgets.QComboBox()
         self.src_lang_combo_box.resize(30, 25)
-        self.src_lang_combo_box.addItems(self.CODES)
-        self.src_lang_combo_box.setCurrentText(langcodes.DEFAULT_LANGUAGE)
+        self.src_lang_combo_box.addItems([self._get_language_name(code) for code in self.CODES])
+        self.src_lang_combo_box.setCurrentText(self._get_language_name(langcodes.DEFAULT_LANGUAGE))
         # maybe add a button to search for a lang code based on lang name?
         # self.src_lang_search_btn = QtWidgets.QPushButton()
 
@@ -44,6 +48,7 @@ class ConverterGUI(QtWidgets.QWidget):
         self.output_file_path_browse_btn.clicked.connect(self._output_file_path_browse_btn_on_click)
 
         self.fields_layout = QtWidgets.QGridLayout()
+        self.fields_layout.setColumnMinimumWidth(0, 350)
         self.fields_layout.addWidget(self.src_lang_label, 0, 0)
         self.fields_layout.addWidget(self.src_lang_combo_box, 0, 1)
         self.fields_layout.addItem(QtWidgets.QSpacerItem(0, 15), 1, 0)
@@ -76,6 +81,9 @@ class ConverterGUI(QtWidgets.QWidget):
         sys.stdout = sys.__stdout__
         super().closeEvent(event)
 
+    def _get_language_name(self, code):
+        return langcodes.get(code).display_name(langcodes.DEFAULT_LANGUAGE)
+
     def _write_to_log_box(self, text):
         log_box_cursor = self.log_box.textCursor()
         log_box_cursor.movePosition(QtGui.QTextCursor.End)
@@ -96,7 +104,7 @@ class ConverterGUI(QtWidgets.QWidget):
 
     def _input_files_dir_path_browse_btn_on_click(self):
         folder = QtWidgets.QFileDialog.getExistingDirectory(self,
-                                                            caption="Select directory",
+                                                            caption="Select directory:",
                                                             directory=path.expanduser('~'))
         if folder != '':
             self.input_files_dir_path_input.setText(folder)
@@ -105,7 +113,7 @@ class ConverterGUI(QtWidgets.QWidget):
         file_dialog = QtWidgets.QFileDialog(self,
                                             caption="Select output file location:",
                                             directory=path.expanduser('~'),
-                                            filter="XML Files|.xml")
+                                            filter="TBX Files|.tbx")
         file = file_dialog.getSaveFileName(self)
         if len(file) != 0:
             self.output_file_path_input.setText(file[0])
@@ -115,10 +123,11 @@ class ConverterGUI(QtWidgets.QWidget):
         from os import listdir
 
         input_dir = self.input_files_dir_path_input.text()
-        files = [path.join(input_dir, f) for f in listdir(input_dir)]
+        files = [path.join(input_dir, f) for f in listdir(input_dir) if f.endswith('.csv')]
 
         output_dir = self.output_file_path_input.text()
 
-        converter = SimpleGlossaryConverter(self.src_lang_combo_box.currentText())
+        src_lang = langcodes.find(self.src_lang_combo_box.currentText())
+        converter = SimpleGlossaryConverter(src_lang.language)
         converter.convert(output_dir, *files)
         print(f"Successfully converted to: '{path.basename(output_dir)}'")
