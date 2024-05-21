@@ -3,12 +3,15 @@ from os import path
 from PyQt5 import QtCore, QtWidgets, QtGui
 import langcodes
 
+
 class ConverterGUI(QtWidgets.QWidget):
     """Provides a Qt GUI for the simple glossary converter."""
 
     CODES = langcodes.LANGUAGE_ALPHA3.keys()
 
+
     class LogStream(QtCore.QObject):
+        """An output stream to replace <stdout>."""
 
         text_written = QtCore.pyqtSignal(str)
 
